@@ -1,6 +1,7 @@
 var mongodb = require('mongodb');
+var mongoose = require('mongoose');
 var EventEmitter = require('events').EventEmitter;
-
+mongoose.Promise = require('bluebird');
 /**
  * Returns a constructor with the specified connect middleware's Store
  * class as its prototype
@@ -40,12 +41,12 @@ module.exports = function(connect) {
     this.options = options;
 
     var connOptions = options.connectionOptions;
-    mongodb.MongoClient.connect(options.uri, connOptions, function(error, db) {
+    mongoose.connect(options.uri, connOptions, function(error, db) {
       if (error) {
         var e = new Error('Error connecting to db: ' + error.message);
         return _this._errorHandler(e, callback);
       }
-
+      var db = mongoose.connection;
       db.
         collection(options.collection).
         ensureIndex({ expires: 1 }, { expireAfterSeconds: 0 }, function(error) {
